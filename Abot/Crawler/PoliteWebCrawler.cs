@@ -6,7 +6,7 @@ using Robots;
 
 namespace Abot.Crawler
 {
-    using Abot.Util;
+    using Util;
     using System.Threading;
 
     /// <summary>

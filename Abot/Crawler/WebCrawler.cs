@@ -13,133 +13,195 @@ using Timer = System.Timers.Timer;
 
 namespace Abot.Crawler
 {
+    /// <summary>
+    /// 网络爬虫接口
+    /// </summary>
     public interface IWebCrawler : IDisposable
     {
         /// <summary>
-        /// Synchronous event that is fired before a page is crawled.
+        /// 在页面被抓取前被触发的同步事件。
         /// </summary>
         event EventHandler<PageCrawlStartingArgs> PageCrawlStarting;
 
         /// <summary>
-        /// Synchronous event that is fired when an individual page has been crawled.
+        /// 当单个页面被抓取时触发的同步事件。
         /// </summary>
         event EventHandler<PageCrawlCompletedArgs> PageCrawlCompleted;
 
         /// <summary>
-        /// Synchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawl impl returned false. This means the page or its links were not crawled.
+        /// 当ICrawlDecisionMaker.ShouldCrawl impl返回false时触发的同步事件。 这意味着该页面或其链接未被抓取。
         /// </summary>
         event EventHandler<PageCrawlDisallowedArgs> PageCrawlDisallowed;
 
         /// <summary>
-        /// Synchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawlLinks impl returned false. This means the page's links were not crawled.
+        /// 当ICrawlDecisionMaker.ShouldCrawlLinks impl返回false时触发的同步事件。 这意味着页面的链接没有被抓取。
         /// </summary>
         event EventHandler<PageLinksCrawlDisallowedArgs> PageLinksCrawlDisallowed;
 
         /// <summary>
-        /// Asynchronous event that is fired before a page is crawled.
+        /// 抓取页面之前触发的异步事件。
         /// </summary>
         event EventHandler<PageCrawlStartingArgs> PageCrawlStartingAsync;
 
         /// <summary>
-        /// Asynchronous event that is fired when an individual page has been crawled.
+        /// 抓取单个页面时触发的异步事件。
         /// </summary>
         event EventHandler<PageCrawlCompletedArgs> PageCrawlCompletedAsync;
 
         /// <summary>
-        /// Asynchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawl impl returned false. This means the page or its links were not crawled.
+        /// 当ICrawlDecisionMaker.ShouldCrawl impl返回false时触发的异步事件。 这意味着该页面或其链接未被抓取。
         /// </summary>
         event EventHandler<PageCrawlDisallowedArgs> PageCrawlDisallowedAsync;
 
         /// <summary>
-        /// Asynchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawlLinks impl returned false. This means the page's links were not crawled.
+        /// 当ICrawlDecisionMaker.ShouldCrawlLinks impl返回false时触发异步事件。 这意味着页面的链接没有被抓取。
         /// </summary>
         event EventHandler<PageLinksCrawlDisallowedArgs> PageLinksCrawlDisallowedAsync;
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether a page should be crawled or not
+        /// 注册要调用的委托以确定是否应抓取页面的同步方法
         /// </summary>
         void ShouldCrawlPage(Func<PageToCrawl, CrawlContext, CrawlDecision> decisionMaker);
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether the page's content should be dowloaded
+        ///同步方法，注册要调用的委托以确定页面的内容是否应该被下载
         /// </summary>
-        /// <param name="shouldDownloadPageContent"></param>
+        /// <param name="decisionMaker"></param>
         void ShouldDownloadPageContent(Func<CrawledPage, CrawlContext, CrawlDecision> decisionMaker);
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether a page's links should be crawled or not
+        /// 注册要调用的委托以确定是否应抓取页面的链接的同步方法
         /// </summary>
-        /// <param name="shouldCrawlPageLinksDelegate"></param>
+        /// <param name="decisionMaker"></param>
         void ShouldCrawlPageLinks(Func<CrawledPage, CrawlContext, CrawlDecision> decisionMaker);
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether a cerain link on a page should be scheduled to be crawled
+        /// 注册要调用的委托的同步方法，以确定页面上的某个链接是否应该被调度为被爬网
         /// </summary>
         void ShouldScheduleLink(Func<Uri, CrawledPage, CrawlContext, bool> decisionMaker);
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether a page should be recrawled
+        /// 注册要调用的委托以确定是否应重新抓取页面的同步方法
         /// </summary>
         void ShouldRecrawlPage(Func<CrawledPage, CrawlContext, CrawlDecision> decisionMaker);
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether the 1st uri param is considered an internal uri to the second uri param
+        /// 同步方法，注册要调用的委托以确定第一个uri参数是否被认为是第二个uri参数的内部uri
         /// </summary>
         /// <param name="decisionMaker delegate"></param>
         void IsInternalUri(Func<Uri, Uri, bool> decisionMaker);
 
         /// <summary>
-        /// Begins a crawl using the uri param
+        /// 使用uri参数开始爬行
         /// </summary>
         CrawlResult Crawl(Uri uri);
 
         /// <summary>
-        /// Begins a crawl using the uri param, and can be cancelled using the CancellationToken
+        ///使用uri参数开始爬网，可以使用CancellationToken取消
         /// </summary>
         CrawlResult Crawl(Uri uri, CancellationTokenSource tokenSource);
 
         /// <summary>
-        /// Dynamic object that can hold any value that needs to be available in the crawl context
+        /// 动态对象可以容纳需要在爬网上下文中可用的任何值
         /// </summary>
         dynamic CrawlBag { get; set; }
     }
-
+    /// <summary>
+    /// 网络爬虫
+    /// </summary>
     [Serializable]
     public abstract class WebCrawler : IWebCrawler
     {
         static ILog _logger = LogManager.GetLogger("AbotLogger");
+        /// <summary>
+        /// 抓取完成
+        /// </summary>
         protected bool _crawlComplete = false;
+        /// <summary>
+        ///爬网停止报告 
+        /// </summary>
         protected bool _crawlStopReported = false;
+        /// <summary>
+        /// 爬行取消报告
+        /// </summary>
         protected bool _crawlCancellationReported = false;
+        /// <summary>
+        /// 
+        /// </summary>
         protected bool _maxPagesToCrawlLimitReachedOrScheduled = false;
+        /// <summary>
+        /// 超时时间
+        /// </summary>
         protected Timer _timeoutTimer;
+        /// <summary>
+        /// 抓取结果
+        /// </summary>
         protected CrawlResult _crawlResult = null;
+        /// <summary>
+        /// 抓取内容
+        /// </summary>
         protected CrawlContext _crawlContext;
+        /// <summary>
+        /// 线程管理
+        /// </summary>
         protected IThreadManager _threadManager;
+        /// <summary>
+        /// 调度器
+        /// </summary>
         protected IScheduler _scheduler;
+        /// <summary>
+        /// 页面请求者
+        /// </summary>
         protected IPageRequester _pageRequester;
+        /// <summary>
+        /// 超链接解析器
+        /// </summary>
         protected IHyperLinkParser _hyperLinkParser;
+        /// <summary>
+        /// 抓取决策者
+        /// </summary>
         protected ICrawlDecisionMaker _crawlDecisionMaker;
+        /// <summary>
+        /// 内存管理
+        /// </summary>
         protected IMemoryManager _memoryManager;
+        /// <summary>
+        /// 
+        /// </summary>
         protected Func<PageToCrawl, CrawlContext, CrawlDecision> _shouldCrawlPageDecisionMaker;
+        /// <summary>
+        /// 
+        /// </summary>
         protected Func<CrawledPage, CrawlContext, CrawlDecision> _shouldDownloadPageContentDecisionMaker;
+        /// <summary>
+        /// 
+        /// </summary>
         protected Func<CrawledPage, CrawlContext, CrawlDecision> _shouldCrawlPageLinksDecisionMaker;
+        /// <summary>
+        /// 
+        /// </summary>
         protected Func<CrawledPage, CrawlContext, CrawlDecision> _shouldRecrawlPageDecisionMaker;
+        /// <summary>
+        /// 
+        /// </summary>
         protected Func<Uri, CrawledPage, CrawlContext, bool> _shouldScheduleLinkDecisionMaker;
+        /// <summary>
+        /// 是内部决策者
+        /// </summary>
         protected Func<Uri, Uri, bool> _isInternalDecisionMaker = (uriInQuestion, rootUri) => uriInQuestion.Authority == rootUri.Authority;
-        
+
 
         /// <summary>
-        /// Dynamic object that can hold any value that needs to be available in the crawl context
+        /// 动态对象可以容纳需要在爬网上下文中可用的任何值
         /// </summary>
         public dynamic CrawlBag { get; set; }
 
-        #region Constructors
+        #region 构造函数
 
         static WebCrawler()
         {
-            //This is a workaround for dealing with periods in urls (http://stackoverflow.com/questions/856885/httpwebrequest-to-url-with-dot-at-the-end)
-            //Will not be needed when this project is upgraded to 4.5
+            //这是处理URL中的句点的解决方法（http://stackoverflow.com/questions/856885/httpwebrequest-to-url-with-dot-at-the-end）
+            //当该项目升级到4.5时，不需要
             MethodInfo getSyntax = typeof(UriParser).GetMethod("GetSyntax", BindingFlags.Static | BindingFlags.NonPublic);
             FieldInfo flagsField = typeof(UriParser).GetField("m_Flags", BindingFlags.Instance | BindingFlags.NonPublic);
             if (getSyntax != null && flagsField != null)
@@ -150,7 +212,7 @@ namespace Abot.Crawler
                     if (parser != null)
                     {
                         int flagsValue = (int)flagsField.GetValue(parser);
-                        // Clear the CanonicalizeAsFilePath attribute
+                        // 清除CanonicalizeAsFilePath属性
                         if ((flagsValue & 0x1000000) != 0)
                             flagsField.SetValue(parser, flagsValue & ~0x1000000);
                     }
@@ -206,7 +268,7 @@ namespace Abot.Crawler
         #endregion Constructors
 
         /// <summary>
-        /// Begins a synchronous crawl using the uri param, subscribe to events to process data as it becomes available
+        /// 使用uri参数开始同步爬网，订阅事件来处理数据，因为它可用
         /// </summary>
         public virtual CrawlResult Crawl(Uri uri)
         {
@@ -214,7 +276,7 @@ namespace Abot.Crawler
         }
 
         /// <summary>
-        /// Begins a synchronous crawl using the uri param, subscribe to events to process data as it becomes available
+        /// 使用uri参数开始同步爬网，订阅事件来处理数据，因为它可用
         /// </summary>
         public virtual CrawlResult Crawl(Uri uri, CancellationTokenSource cancellationTokenSource)
         {
@@ -288,28 +350,32 @@ namespace Abot.Crawler
             return _crawlResult;
         }
 
-        #region Synchronous Events
+        #region 同步事件
 
         /// <summary>
-        /// Synchronous event that is fired before a page is crawled.
+        /// 抓取页面之前触发的同步事件。
         /// </summary>
         public event EventHandler<PageCrawlStartingArgs> PageCrawlStarting;
 
         /// <summary>
-        /// Synchronous event that is fired when an individual page has been crawled.
+        /// 抓取单个页面时触发的同步事件。
         /// </summary>
         public event EventHandler<PageCrawlCompletedArgs> PageCrawlCompleted;
 
         /// <summary>
-        /// Synchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawl impl returned false. This means the page or its links were not crawled.
+        ///当ICrawlDecisionMaker.ShouldCrawl impl返回false时触发的同步事件。 这意味着该页面或其链接未被抓取。
         /// </summary>
         public event EventHandler<PageCrawlDisallowedArgs> PageCrawlDisallowed;
 
         /// <summary>
-        /// Synchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawlLinks impl returned false. This means the page's links were not crawled.
+        /// 当ICrawlDecisionMaker.ShouldCrawlLinks impl返回false时触发的同步事件。 这意味着页面的链接没有被抓取。
         /// </summary>
         public event EventHandler<PageLinksCrawlDisallowedArgs> PageLinksCrawlDisallowed;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageToCrawl"></param>
         protected virtual void FirePageCrawlStartingEvent(PageToCrawl pageToCrawl)
         {
             try
@@ -324,7 +390,10 @@ namespace Abot.Crawler
                 _logger.Error(e);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="crawledPage"></param>
         protected virtual void FirePageCrawlCompletedEvent(CrawledPage crawledPage)
         {
             try
@@ -339,7 +408,11 @@ namespace Abot.Crawler
                 _logger.Error(e);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageToCrawl"></param>
+        /// <param name="reason"></param>
         protected virtual void FirePageCrawlDisallowedEvent(PageToCrawl pageToCrawl, string reason)
         {
             try
@@ -354,7 +427,11 @@ namespace Abot.Crawler
                 _logger.Error(e);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="crawledPage"></param>
+        /// <param name="reason"></param>
         protected virtual void FirePageLinksCrawlDisallowedEvent(CrawledPage crawledPage, string reason)
         {
             try
@@ -372,28 +449,31 @@ namespace Abot.Crawler
 
         #endregion
 
-        #region Asynchronous Events
+        #region 异步事件
 
         /// <summary>
-        /// Asynchronous event that is fired before a page is crawled.
+        /// 抓取页面之前触发的异步事件。
         /// </summary>
         public event EventHandler<PageCrawlStartingArgs> PageCrawlStartingAsync;
 
         /// <summary>
-        /// Asynchronous event that is fired when an individual page has been crawled.
+        /// 抓取单个页面时触发的异步事件。
         /// </summary>
         public event EventHandler<PageCrawlCompletedArgs> PageCrawlCompletedAsync;
 
         /// <summary>
-        /// Asynchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawl impl returned false. This means the page or its links were not crawled.
+        /// 当ICrawlDecisionMaker.ShouldCrawl impl返回false时触发的异步事件。 这意味着该页面或其链接未被抓取。
         /// </summary>
         public event EventHandler<PageCrawlDisallowedArgs> PageCrawlDisallowedAsync;
 
         /// <summary>
-        /// Asynchronous event that is fired when the ICrawlDecisionMaker.ShouldCrawlLinks impl returned false. This means the page's links were not crawled.
+        /// 当ICrawlDecisionMaker.ShouldCrawlLinks impl返回false时触发异步事件。 这意味着页面的链接没有被抓取。
         /// </summary>
         public event EventHandler<PageLinksCrawlDisallowedArgs> PageLinksCrawlDisallowedAsync;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageToCrawl"></param>
         protected virtual void FirePageCrawlStartingEventAsync(PageToCrawl pageToCrawl)
         {
             EventHandler<PageCrawlStartingArgs> threadSafeEvent = PageCrawlStartingAsync;
@@ -406,17 +486,20 @@ namespace Abot.Crawler
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="crawledPage"></param>
         protected virtual void FirePageCrawlCompletedEventAsync(CrawledPage crawledPage)
         {
             EventHandler<PageCrawlCompletedArgs> threadSafeEvent = PageCrawlCompletedAsync;
-            
+
             if (threadSafeEvent == null)
                 return;
 
             if (_scheduler.Count == 0)
             {
-                //Must be fired synchronously to avoid main thread exiting before completion of event handler for first or last page crawled
+                //必须同步触发，以避免主线程在完成第一个或最后一个页面爬行的事件处理程序之前退出
                 try
                 {
                     threadSafeEvent(this, new PageCrawlCompletedArgs(_crawlContext, crawledPage));
@@ -436,7 +519,11 @@ namespace Abot.Crawler
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageToCrawl"></param>
+        /// <param name="reason"></param>
         protected virtual void FirePageCrawlDisallowedEventAsync(PageToCrawl pageToCrawl, string reason)
         {
             EventHandler<PageCrawlDisallowedArgs> threadSafeEvent = PageCrawlDisallowedAsync;
@@ -449,7 +536,11 @@ namespace Abot.Crawler
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="crawledPage"></param>
+        /// <param name="reason"></param>
         protected virtual void FirePageLinksCrawlDisallowedEventAsync(CrawledPage crawledPage, string reason)
         {
             EventHandler<PageLinksCrawlDisallowedArgs> threadSafeEvent = PageLinksCrawlDisallowedAsync;
@@ -467,7 +558,7 @@ namespace Abot.Crawler
 
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether a page should be crawled or not
+        /// 注册要调用的委托以确定是否应抓取页面的同步方法
         /// </summary>
         public void ShouldCrawlPage(Func<PageToCrawl, CrawlContext, CrawlDecision> decisionMaker)
         {
@@ -475,25 +566,25 @@ namespace Abot.Crawler
         }
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether the page's content should be dowloaded
+        /// 同步方法，注册要调用的委托以确定页面的内容是否应该被下载
         /// </summary>
-        /// <param name="shouldDownloadPageContent"></param>
+        /// <param name="decisionMaker"></param>
         public void ShouldDownloadPageContent(Func<CrawledPage, CrawlContext, CrawlDecision> decisionMaker)
         {
             _shouldDownloadPageContentDecisionMaker = decisionMaker;
         }
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether a page's links should be crawled or not
+        /// 注册要调用的委托以确定是否应抓取页面的链接的同步方法
         /// </summary>
-        /// <param name="shouldCrawlPageLinksDelegate"></param>
+        /// <param name="decisionMaker"></param>
         public void ShouldCrawlPageLinks(Func<CrawledPage, CrawlContext, CrawlDecision> decisionMaker)
         {
             _shouldCrawlPageLinksDecisionMaker = decisionMaker;
         }
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether a cerain link on a page should be scheduled to be crawled
+        /// 注册要调用的委托的同步方法，以确定页面上的某个链接是否应该被调度为被爬网
         /// </summary>
         public void ShouldScheduleLink(Func<Uri, CrawledPage, CrawlContext, bool> decisionMaker)
         {
@@ -501,7 +592,7 @@ namespace Abot.Crawler
         }
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether a page should be recrawled or not
+        /// 注册要调用的委托以确定是否应重新抓取页面的同步方法
         /// </summary>
         public void ShouldRecrawlPage(Func<CrawledPage, CrawlContext, CrawlDecision> decisionMaker)
         {
@@ -509,7 +600,7 @@ namespace Abot.Crawler
         }
 
         /// <summary>
-        /// Synchronous method that registers a delegate to be called to determine whether the 1st uri param is considered an internal uri to the second uri param
+        /// 同步方法，注册要调用的委托以确定第一个uri参数是否被认为是第二个uri参数的内部uri
         /// </summary>
         /// <param name="decisionMaker delegate"></param>     
         public void IsInternalUri(Func<Uri, Uri, bool> decisionMaker)
@@ -527,7 +618,9 @@ namespace Abot.Crawler
             _logger.DebugFormat("abot config section was found");
             return configFromFile.Convert();
         }
-
+        /// <summary>
+        /// 抓取网站
+        /// </summary>
         protected virtual void CrawlSite()
         {
             while (!_crawlComplete)
@@ -549,7 +642,9 @@ namespace Abot.Crawler
                 }
             }
         }
-
+        /// <summary>
+        ///验证必需的可用内存 
+        /// </summary>
         protected virtual void VerifyRequiredAvailableMemory()
         {
             if (_crawlContext.CrawlConfiguration.MinAvailableMemoryRequiredInMb < 1)
@@ -558,7 +653,9 @@ namespace Abot.Crawler
             if (!_memoryManager.IsSpaceAvailable(_crawlContext.CrawlConfiguration.MinAvailableMemoryRequiredInMb))
                 throw new InsufficientMemoryException(string.Format("Process does not have the configured [{0}mb] of available memory to crawl site [{1}]. This is configurable through the minAvailableMemoryRequiredInMb in app.conf or CrawlConfiguration.MinAvailableMemoryRequiredInMb.", _crawlContext.CrawlConfiguration.MinAvailableMemoryRequiredInMb, _crawlContext.RootUri));
         }
-
+        /// <summary>
+        /// 运行前工作检查
+        /// </summary>
         protected virtual void RunPreWorkChecks()
         {
             CheckMemoryUsage();
@@ -566,7 +663,9 @@ namespace Abot.Crawler
             CheckForHardStopRequest();
             CheckForStopRequest();
         }
-
+        /// <summary>
+        /// 检查内存使用情况
+        /// </summary>
         protected virtual void CheckMemoryUsage()
         {
             if (_memoryManager == null
@@ -590,7 +689,9 @@ namespace Abot.Crawler
                 _crawlContext.IsCrawlHardStopRequested = true;
             }
         }
-
+        /// <summary>
+        /// 检查取消请求
+        /// </summary>
         protected virtual void CheckForCancellationRequest()
         {
             if (_crawlContext.CancellationTokenSource.IsCancellationRequested)
@@ -605,7 +706,9 @@ namespace Abot.Crawler
                 }
             }
         }
-
+        /// <summary>
+        ///检查硬停止请求 
+        /// </summary>
         protected virtual void CheckForHardStopRequest()
         {
             if (_crawlContext.IsCrawlHardStopRequested)
@@ -620,7 +723,7 @@ namespace Abot.Crawler
                 _threadManager.AbortAll();
                 _scheduler.Clear();//to be sure nothing was scheduled since first call to clear()
 
-                //Set all events to null so no more events are fired
+                //将所有事件设置为null，以便不会再触发任何事件
                 PageCrawlStarting = null;
                 PageCrawlCompleted = null;
                 PageCrawlDisallowed = null;
@@ -631,7 +734,9 @@ namespace Abot.Crawler
                 PageLinksCrawlDisallowedAsync = null;
             }
         }
-
+        /// <summary>
+        /// 检查停止请求
+        /// </summary>
         protected virtual void CheckForStopRequest()
         {
             if (_crawlContext.IsCrawlStopRequested)
@@ -644,7 +749,11 @@ namespace Abot.Crawler
                 _scheduler.Clear();
             }
         }
-
+        /// <summary>
+        /// 处理抓取超时
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected virtual void HandleCrawlTimeout(object sender, ElapsedEventArgs e)
         {
             Timer elapsedTimer = sender as Timer;
@@ -654,8 +763,10 @@ namespace Abot.Crawler
             _logger.InfoFormat("Crawl timeout of [{0}] seconds has been reached for [{1}]", _crawlContext.CrawlConfiguration.CrawlTimeoutSeconds, _crawlContext.RootUri);
             _crawlContext.IsCrawlHardStopRequested = true;
         }
-
-        //protected virtual async Task ProcessPage(PageToCrawl pageToCrawl)
+        /// <summary>
+        /// 异步任务处理页面
+        /// </summary>
+        /// <param name="pageToCrawl"></param>
         protected virtual void ProcessPage(PageToCrawl pageToCrawl)
         {
             try
@@ -676,7 +787,7 @@ namespace Abot.Crawler
 
                 if (IsRedirect(crawledPage) && !_crawlContext.CrawlConfiguration.IsHttpRequestAutoRedirectsEnabled)
                     ProcessRedirect(crawledPage);
-                
+
                 if (PageSizeIsAboveMax(crawledPage))
                     return;
 
@@ -700,7 +811,7 @@ namespace Abot.Crawler
                 {
                     crawledPage.IsRetry = true;
                     _scheduler.Add(crawledPage);
-                }   
+                }
             }
             catch (OperationCanceledException oce)
             {
@@ -716,12 +827,15 @@ namespace Abot.Crawler
                 _crawlContext.IsCrawlHardStopRequested = true;
             }
         }
-
+        /// <summary>
+        /// 处理重定向
+        /// </summary>
+        /// <param name="crawledPage"></param>
         protected virtual void ProcessRedirect(CrawledPage crawledPage)
         {
             if (crawledPage.RedirectPosition >= 20)
                 _logger.WarnFormat("Page [{0}] is part of a chain of 20 or more consecutive redirects, redirects for this chain will now be aborted.", crawledPage.Uri);
-                
+
             try
             {
                 var uri = ExtractRedirectUri(crawledPage);
@@ -743,40 +857,57 @@ namespace Abot.Crawler
                     _scheduler.Add(page);
                 }
             }
-            catch {}
+            catch { }
         }
 
+        /// <summary>
+        /// 是否内部Uri
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
         protected virtual bool IsInternalUri(Uri uri)
         {
-            return  _isInternalDecisionMaker(uri, _crawlContext.RootUri) ||
+            return _isInternalDecisionMaker(uri, _crawlContext.RootUri) ||
                 _isInternalDecisionMaker(uri, _crawlContext.OriginalRootUri);
         }
 
+        /// <summary>
+        /// 是否重定向
+        /// </summary>
+        /// <param name="crawledPage"></param>
+        /// <returns></returns>
         protected virtual bool IsRedirect(CrawledPage crawledPage)
         {
             bool isRedirect = false;
-            if (crawledPage.HttpWebResponse != null) {
+            if (crawledPage.HttpWebResponse != null)
+            {
                 isRedirect = (_crawlContext.CrawlConfiguration.IsHttpRequestAutoRedirectsEnabled &&
                     crawledPage.HttpWebResponse.ResponseUri != null &&
                     crawledPage.HttpWebResponse.ResponseUri.AbsoluteUri != crawledPage.Uri.AbsoluteUri) ||
                     (!_crawlContext.CrawlConfiguration.IsHttpRequestAutoRedirectsEnabled &&
-                    (int) crawledPage.HttpWebResponse.StatusCode >= 300 &&
-                    (int) crawledPage.HttpWebResponse.StatusCode <= 399);
+                    (int)crawledPage.HttpWebResponse.StatusCode >= 300 &&
+                    (int)crawledPage.HttpWebResponse.StatusCode <= 399);
             }
             return isRedirect;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected virtual void ThrowIfCancellationRequested()
         {
             if (_crawlContext.CancellationTokenSource != null && _crawlContext.CancellationTokenSource.IsCancellationRequested)
                 _crawlContext.CancellationTokenSource.Token.ThrowIfCancellationRequested();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="crawledPage"></param>
+        /// <returns></returns>
         protected virtual bool PageSizeIsAboveMax(CrawledPage crawledPage)
         {
             bool isAboveMax = false;
             if (_crawlContext.CrawlConfiguration.MaxPageSizeInBytes > 0 &&
-                crawledPage.Content.Bytes != null && 
+                crawledPage.Content.Bytes != null &&
                 crawledPage.Content.Bytes.Length > _crawlContext.CrawlConfiguration.MaxPageSizeInBytes)
             {
                 isAboveMax = true;
@@ -784,7 +915,11 @@ namespace Abot.Crawler
             }
             return isAboveMax;
         }
-
+        /// <summary>
+        /// 抓取页面链接
+        /// </summary>
+        /// <param name="crawledPage"></param>
+        /// <returns></returns>
         protected virtual bool ShouldCrawlPageLinks(CrawledPage crawledPage)
         {
             CrawlDecision shouldCrawlPageLinksDecision = _crawlDecisionMaker.ShouldCrawlPageLinks(crawledPage, _crawlContext);
@@ -801,7 +936,11 @@ namespace Abot.Crawler
             SignalCrawlStopIfNeeded(shouldCrawlPageLinksDecision);
             return shouldCrawlPageLinksDecision.Allow;
         }
-
+        /// <summary>
+        /// 抓取页面
+        /// </summary>
+        /// <param name="pageToCrawl"></param>
+        /// <returns></returns>
         protected virtual bool ShouldCrawlPage(PageToCrawl pageToCrawl)
         {
             if (_maxPagesToCrawlLimitReachedOrScheduled)
@@ -829,7 +968,11 @@ namespace Abot.Crawler
             SignalCrawlStopIfNeeded(shouldCrawlPageDecision);
             return shouldCrawlPageDecision.Allow;
         }
-
+        /// <summary>
+        /// 重新抓取页面
+        /// </summary>
+        /// <param name="crawledPage"></param>
+        /// <returns></returns>
         protected virtual bool ShouldRecrawlPage(CrawledPage crawledPage)
         {
             //TODO No unit tests cover these lines
@@ -857,7 +1000,7 @@ namespace Abot.Crawler
                         if (crawledPage.LastRequest.HasValue && DateTime.TryParse(value, out date))
                         {
                             crawledPage.RetryAfter = (date - crawledPage.LastRequest.Value).TotalSeconds;
-                        } 
+                        }
                         else if (double.TryParse(value, out seconds))
                         {
                             crawledPage.RetryAfter = seconds;
@@ -870,15 +1013,19 @@ namespace Abot.Crawler
             return shouldRecrawlPageDecision.Allow;
         }
 
-        //protected virtual async Task<CrawledPage> CrawlThePage(PageToCrawl pageToCrawl)
+        /// <summary>
+        /// 异步任务<CrawledPage> CrawlThePage（PageToCrawl pageToCrawl）
+        /// </summary>
+        /// <param name="pageToCrawl"></param>
+        /// <returns></returns>
         protected virtual CrawledPage CrawlThePage(PageToCrawl pageToCrawl)
         {
             _logger.DebugFormat("About to crawl page [{0}]", pageToCrawl.Uri.AbsoluteUri);
             FirePageCrawlStartingEventAsync(pageToCrawl);
             FirePageCrawlStartingEvent(pageToCrawl);
 
-            if (pageToCrawl.IsRetry){ WaitMinimumRetryDelay(pageToCrawl); }
-            
+            if (pageToCrawl.IsRetry) { WaitMinimumRetryDelay(pageToCrawl); }
+
             pageToCrawl.LastRequest = DateTime.Now;
 
             CrawledPage crawledPage = _pageRequester.MakeRequest(pageToCrawl.Uri, ShouldDownloadPageContent);
@@ -894,6 +1041,11 @@ namespace Abot.Crawler
             return crawledPage;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="dest"></param>
         protected void Map(PageToCrawl src, CrawledPage dest)
         {
             dest.Uri = src.Uri;
@@ -909,7 +1061,12 @@ namespace Abot.Crawler
             dest.RedirectedFrom = src.RedirectedFrom;
             dest.RedirectPosition = src.RedirectPosition;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageToCrawlBag"></param>
+        /// <param name="crawledPageBag"></param>
+        /// <returns></returns>
         protected virtual dynamic CombinePageBags(dynamic pageToCrawlBag, dynamic crawledPageBag)
         {
             IDictionary<string, object> combinedBag = new ExpandoObject();
@@ -921,7 +1078,10 @@ namespace Abot.Crawler
 
             return combinedBag;
         }
-
+        /// <summary>
+        /// 添加页面到上下文
+        /// </summary>
+        /// <param name="pageToCrawl"></param>
         protected virtual void AddPageToContext(PageToCrawl pageToCrawl)
         {
             if (pageToCrawl.IsRetry)
@@ -934,12 +1094,18 @@ namespace Abot.Crawler
             Interlocked.Increment(ref _crawlContext.CrawledCount);
             _crawlContext.CrawlCountByDomain.AddOrUpdate(pageToCrawl.Uri.Authority, 1, (key, oldValue) => oldValue + 1);
         }
-
+        /// <summary>
+        /// 解析页面链接
+        /// </summary>
+        /// <param name="crawledPage"></param>
         protected virtual void ParsePageLinks(CrawledPage crawledPage)
         {
             crawledPage.ParsedLinks = _hyperLinkParser.GetLinks(crawledPage);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="crawledPage"></param>
         protected virtual void SchedulePageLinks(CrawledPage crawledPage)
         {
             int linksToCrawl = 0;
@@ -978,19 +1144,32 @@ namespace Abot.Crawler
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="page"></param>
+        /// <returns></returns>
         protected virtual bool ShouldSchedulePageLink(PageToCrawl page)
         {
             if ((page.IsInternal || _crawlContext.CrawlConfiguration.IsExternalPageCrawlingEnabled) && (ShouldCrawlPage(page)))
                 return true;
 
-            return false;   
+            return false;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="linksAdded"></param>
+        /// <returns></returns>
         protected virtual bool ShouldScheduleMorePageLink(int linksAdded)
         {
             return _crawlContext.CrawlConfiguration.MaxLinksPerPage == 0 || _crawlContext.CrawlConfiguration.MaxLinksPerPage > linksAdded;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="crawledPage"></param>
+        /// <returns></returns>
         protected virtual CrawlDecision ShouldDownloadPageContent(CrawledPage crawledPage)
         {
             CrawlDecision decision = _crawlDecisionMaker.ShouldDownloadPageContent(crawledPage, _crawlContext);
@@ -1001,6 +1180,10 @@ namespace Abot.Crawler
             return decision;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
         protected virtual void PrintConfigValues(CrawlConfiguration config)
         {
             _logger.Info("Configuration Values:");
@@ -1019,7 +1202,10 @@ namespace Abot.Crawler
                 _logger.InfoFormat("{0}{1}: {2}", indentString, key, config.ConfigurationExtensions[key]);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="decision"></param>
         protected virtual void SignalCrawlStopIfNeeded(CrawlDecision decision)
         {
             if (decision.ShouldHardStopCrawl)
@@ -1033,7 +1219,10 @@ namespace Abot.Crawler
                 _crawlContext.IsCrawlStopRequested = decision.ShouldStopCrawl;
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageToCrawl"></param>
         protected virtual void WaitMinimumRetryDelay(PageToCrawl pageToCrawl)
         {
             //TODO No unit tests cover these lines
@@ -1048,7 +1237,7 @@ namespace Abot.Crawler
             if (pageToCrawl.RetryAfter.HasValue)
             {
                 // Use the time to wait provided by the server instead of the config, if any.
-                milliToWait = pageToCrawl.RetryAfter.Value*1000 - milliSinceLastRequest;
+                milliToWait = pageToCrawl.RetryAfter.Value * 1000 - milliSinceLastRequest;
             }
             else
             {
@@ -1073,11 +1262,13 @@ namespace Abot.Crawler
         /// </summary>
         protected virtual void ValidateRootUriForRedirection(CrawledPage crawledRootPage)
         {
-            if (!crawledRootPage.IsRoot) {
+            if (!crawledRootPage.IsRoot)
+            {
                 throw new ArgumentException("The crawled page must be the root page to be validated for redirection.");
             }
 
-            if (IsRedirect(crawledRootPage)) {
+            if (IsRedirect(crawledRootPage))
+            {
                 _crawlContext.RootUri = ExtractRedirectUri(crawledRootPage);
                 _logger.InfoFormat("The root URI [{0}] was redirected to [{1}]. [{1}] is the new root.",
                     _crawlContext.OriginalRootUri,
@@ -1095,10 +1286,13 @@ namespace Abot.Crawler
         protected virtual Uri ExtractRedirectUri(CrawledPage crawledPage)
         {
             Uri locationUri;
-            if (_crawlContext.CrawlConfiguration.IsHttpRequestAutoRedirectsEnabled) {
+            if (_crawlContext.CrawlConfiguration.IsHttpRequestAutoRedirectsEnabled)
+            {
                 // For auto redirects, look for the response uri.
                 locationUri = crawledPage.HttpWebResponse.ResponseUri;
-            } else {
+            }
+            else
+            {
                 // For manual redirects, we need to look for the location header.
                 var location = crawledPage.HttpWebResponse.Headers["Location"];
 
@@ -1111,7 +1305,9 @@ namespace Abot.Crawler
             }
             return locationUri;
         }
-
+        /// <summary>
+        /// 回收
+        /// </summary>
         public virtual void Dispose()
         {
             if (_threadManager != null)
