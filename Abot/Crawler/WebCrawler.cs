@@ -265,7 +265,7 @@ namespace Abot.Crawler
             _crawlContext.Scheduler = _scheduler;
         }
 
-        #endregion Constructors
+        #endregion 
 
         /// <summary>
         /// 使用uri参数开始同步爬网，订阅事件来处理数据，因为它可用
@@ -1014,7 +1014,7 @@ namespace Abot.Crawler
         }
 
         /// <summary>
-        /// 异步任务<CrawledPage> CrawlThePage（PageToCrawl pageToCrawl）
+        /// 异步任务 CrawlThePage（PageToCrawl pageToCrawl）
         /// </summary>
         /// <param name="pageToCrawl"></param>
         /// <returns></returns>
@@ -1090,7 +1090,7 @@ namespace Abot.Crawler
                 return;
             }
 
-            int domainCount = 0;
+            //int domainCount = 0;
             Interlocked.Increment(ref _crawlContext.CrawledCount);
             _crawlContext.CrawlCountByDomain.AddOrUpdate(pageToCrawl.Uri.Authority, 1, (key, oldValue) => oldValue + 1);
         }
@@ -1277,7 +1277,7 @@ namespace Abot.Crawler
         }
 
         /// <summary>
-        /// Retrieve the URI where the specified crawled page was redirected.
+        /// 检索指定的抓取页重定向的URI。
         /// </summary>
         /// <remarks>
         /// If HTTP auto redirections is disabled, this value is stored in the 'Location' header of the response.
@@ -1288,7 +1288,7 @@ namespace Abot.Crawler
             Uri locationUri;
             if (_crawlContext.CrawlConfiguration.IsHttpRequestAutoRedirectsEnabled)
             {
-                // For auto redirects, look for the response uri.
+                // 自动重定向，寻找响应的URI。
                 locationUri = crawledPage.HttpWebResponse.ResponseUri;
             }
             else
@@ -1296,7 +1296,7 @@ namespace Abot.Crawler
                 // For manual redirects, we need to look for the location header.
                 var location = crawledPage.HttpWebResponse.Headers["Location"];
 
-                // Check if the location is absolute. If not, create an absolute uri.
+                // 如果位置是绝对的。如果不是，创建一个绝对URI。
                 if (!Uri.TryCreate(location, UriKind.Absolute, out locationUri))
                 {
                     Uri baseUri = new Uri(crawledPage.Uri.GetLeftPart(UriPartial.Authority));
