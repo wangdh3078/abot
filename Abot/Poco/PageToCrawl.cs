@@ -3,14 +3,22 @@ using System.Dynamic;
 
 namespace Abot.Poco
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public class PageToCrawl
     {
-        //Needed for serialization
+        /// <summary>
+        /// Needed for serialization
+        /// </summary>
         public PageToCrawl()
         {
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uri"></param>
         public PageToCrawl(Uri uri)
         {
             if (uri == null)

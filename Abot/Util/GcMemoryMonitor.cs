@@ -4,16 +4,28 @@ using System.Diagnostics;
 
 namespace Abot.Util
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IMemoryMonitor : IDisposable
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         int GetCurrentUsageInMb();
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public class GcMemoryMonitor : IMemoryMonitor
     {
         static ILog _logger = LogManager.GetLogger("AbotLogger");
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public virtual int GetCurrentUsageInMb()
         {
             Stopwatch timer = Stopwatch.StartNew();
@@ -24,7 +36,9 @@ namespace Abot.Util
 
             return currentUsageInMb;       
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             //do nothing

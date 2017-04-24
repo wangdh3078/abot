@@ -30,20 +30,46 @@ namespace Abot.Crawler
     public class PoliteWebCrawler : WebCrawler, IPoliteWebCrawler
     {
         private static ILog _logger = LogManager.GetLogger("AbotLogger");
+        /// <summary>
+        /// 
+        /// </summary>
         protected IDomainRateLimiter _domainRateLimiter;
+        /// <summary>
+        /// 
+        /// </summary>
         protected IRobotsDotTextFinder _robotsDotTextFinder;
+        /// <summary>
+        /// 
+        /// </summary>
         protected IRobotsDotText _robotsDotText;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public PoliteWebCrawler()
             : this(null, null, null, null, null, null, null, null, null)
         {
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="crawlConfiguration"></param>
         public PoliteWebCrawler(CrawlConfiguration crawlConfiguration)
             : this(crawlConfiguration, null, null, null, null, null, null, null, null)
         {
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="crawlConfiguration"></param>
+        /// <param name="crawlDecisionMaker"></param>
+        /// <param name="threadManager"></param>
+        /// <param name="scheduler"></param>
+        /// <param name="pageRequester"></param>
+        /// <param name="hyperLinkParser"></param>
+        /// <param name="memoryManager"></param>
+        /// <param name="domainRateLimiter"></param>
+        /// <param name="robotsDotTextFinder"></param>
         public PoliteWebCrawler(
             CrawlConfiguration crawlConfiguration,
             ICrawlDecisionMaker crawlDecisionMaker,
@@ -59,7 +85,12 @@ namespace Abot.Crawler
             _domainRateLimiter = domainRateLimiter ?? new DomainRateLimiter(_crawlContext.CrawlConfiguration.MinCrawlDelayPerDomainMilliSeconds);
             _robotsDotTextFinder = robotsDotTextFinder ?? new RobotsDotTextFinder(new PageRequester(_crawlContext.CrawlConfiguration));
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="cancellationTokenSource"></param>
+        /// <returns></returns>
         public override CrawlResult Crawl(Uri uri, CancellationTokenSource cancellationTokenSource)
         {
             int robotsDotTextCrawlDelayInSecs = 0;
@@ -99,7 +130,11 @@ namespace Abot.Crawler
 
             return base.Crawl(uri, cancellationTokenSource);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageToCrawl"></param>
+        /// <returns></returns>
         protected override bool ShouldCrawlPage(PageToCrawl pageToCrawl)
         {
             bool allowedByRobots = true;

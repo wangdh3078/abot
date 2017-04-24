@@ -2,9 +2,15 @@
 
 namespace Abot.Poco
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public class CrawlResult
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public CrawlResult()
         {
         }

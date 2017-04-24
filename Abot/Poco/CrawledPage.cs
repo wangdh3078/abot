@@ -11,6 +11,9 @@ using AngleSharp.Parser.Html;
 
 namespace Abot.Poco
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public class CrawledPage : PageToCrawl
     {
@@ -21,6 +24,10 @@ namespace Abot.Poco
         Lazy<CQ> _csQueryDocument;
         Lazy<IHtmlDocument> _angleSharpHtmlDocument;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uri"></param>
         public CrawledPage(Uri uri)
             : base(uri)
         {

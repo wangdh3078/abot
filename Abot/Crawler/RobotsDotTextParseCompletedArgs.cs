@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Abot.Poco;
+﻿using Abot.Poco;
 using Robots;
 
 namespace Abot.Crawler
 {
     /// <summary>
-    /// Class which hold robot txt data after successful parsing
+    ///成功解析后保存机器人TXT数据的类
     /// </summary>
     public class RobotsDotTextParseCompletedArgs : CrawlArgs
     {
         /// <summary>
-        /// robots.txt object
+        /// robots.txt对象
         /// </summary>
         public IRobots Robots { get; set; }
 

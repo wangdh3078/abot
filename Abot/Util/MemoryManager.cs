@@ -19,13 +19,18 @@ namespace Abot.Util
         /// </summary>
         bool IsSpaceAvailable(int sizeInMb);
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public class MemoryManager : IMemoryManager
     {
         static ILog _logger = LogManager.GetLogger("AbotLogger");
         IMemoryMonitor _memoryMonitor;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memoryMonitor"></param>
         public MemoryManager(IMemoryMonitor memoryMonitor)
         {
             if (memoryMonitor == null)
@@ -33,12 +38,20 @@ namespace Abot.Util
 
             _memoryMonitor = memoryMonitor;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sizeInMb"></param>
+        /// <returns></returns>
         public virtual bool IsCurrentUsageAbove(int sizeInMb)
         {
             return GetCurrentUsageInMb() > sizeInMb;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sizeInMb"></param>
+        /// <returns></returns>
         public virtual bool IsSpaceAvailable(int sizeInMb)
         {
             if (sizeInMb < 1)
@@ -67,12 +80,17 @@ namespace Abot.Util
 
             return isAvailable;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public virtual int GetCurrentUsageInMb()
         {
             return _memoryMonitor.GetCurrentUsageInMb();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             _memoryMonitor.Dispose();

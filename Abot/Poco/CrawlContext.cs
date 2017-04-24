@@ -6,9 +6,15 @@ using System.Threading;
 
 namespace Abot.Poco
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public class CrawlContext
     {
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         public CrawlContext()
         {
             CrawlCountByDomain = new ConcurrentDictionary<string, int>();

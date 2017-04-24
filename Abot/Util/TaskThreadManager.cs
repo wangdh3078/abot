@@ -12,31 +12,45 @@ namespace Abot.Util
     public class TaskThreadManager : ThreadManager
     {
         readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="maxConcurrentTasks"></param>
         public TaskThreadManager(int maxConcurrentTasks)
             :this(maxConcurrentTasks, null)
         {
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="maxConcurrentTasks"></param>
+        /// <param name="cancellationTokenSource"></param>
         public TaskThreadManager(int maxConcurrentTasks, CancellationTokenSource cancellationTokenSource)
             : base(maxConcurrentTasks)
         {
             _cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public override void AbortAll()
         {
             base.AbortAll();
             _cancellationTokenSource.Cancel();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public override void Dispose()
         {
             base.Dispose();
             if (!_cancellationTokenSource.IsCancellationRequested)
                 _cancellationTokenSource.Cancel();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="action"></param>
         protected override void RunActionOnDedicatedThread(Action action)
         {
             Task.Factory

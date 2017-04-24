@@ -30,16 +30,40 @@ namespace Abot.Util
         /// </summary>
         void AbortAll();
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public abstract class ThreadManager : IThreadManager
     {
+        /// <summary>
+        /// 
+        /// </summary>
         protected static ILog _logger = LogManager.GetLogger("AbotLogger");
+        /// <summary>
+        /// 
+        /// </summary>
         protected bool _abortAllCalled = false;
+        /// <summary>
+        /// 
+        /// </summary>
         protected int _numberOfRunningThreads = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         protected ManualResetEvent _resetEvent = new ManualResetEvent(true);
+        /// <summary>
+        /// 
+        /// </summary>
         protected Object _locker = new Object();
+        /// <summary>
+        /// 
+        /// </summary>
         protected bool _isDisplosed = false;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="maxThreads"></param>
 
         public ThreadManager(int maxThreads)
         {
@@ -87,25 +111,36 @@ namespace Abot.Util
                 RunAction(action, false);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public virtual void AbortAll()
         {
             _abortAllCalled = true;
             _numberOfRunningThreads = 0;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public virtual void Dispose()
         {
             AbortAll();
             _resetEvent.Dispose();
             _isDisplosed = true;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public virtual bool HasRunningThreads()
         {
             return _numberOfRunningThreads > 0;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="decrementRunningThreadCountOnCompletion"></param>
         protected virtual void RunAction(Action action, bool decrementRunningThreadCountOnCompletion = true)
         {
             try

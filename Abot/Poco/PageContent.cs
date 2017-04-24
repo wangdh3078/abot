@@ -3,9 +3,15 @@ using System.Text;
 
 namespace Abot.Poco
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public class PageContent
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public PageContent()
         {
             Text = "";

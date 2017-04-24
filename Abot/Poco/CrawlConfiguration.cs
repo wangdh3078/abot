@@ -3,9 +3,15 @@ using System.Collections.Generic;
 
 namespace Abot.Poco
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public class CrawlConfiguration
     {
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         public CrawlConfiguration()
         {
             MaxConcurrentThreads = 10;

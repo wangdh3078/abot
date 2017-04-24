@@ -4,8 +4,14 @@ using System.Threading;
 
 namespace Abot.Util
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IRateLimiter
     {
+        /// <summary>
+        /// 
+        /// </summary>
         void WaitToProceed();
     }
     //http://www.pennedobjects.com/2010/10/better-rate-limiting-with-dot-net/

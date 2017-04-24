@@ -3,9 +3,15 @@ using System;
 
 namespace Abot.Poco
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public class CrawlDecision
     {
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         public CrawlDecision()
         {
             Reason = "";
